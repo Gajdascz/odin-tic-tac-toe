@@ -10,11 +10,27 @@ const gameBoard = (() => {
       boardArray[i].push('null');
     }
   }
-
-  const getBoard = () => boardArray;
-
-
-  return { getBoard };
+  const printBoard = () => {
+    const gameBoardDisplay = document.querySelector(`.game-board-container`);
+    for(let i = 0; i < rows; i++) { 
+      const boardRowDiv = document.createElement(`div`);
+      boardRowDiv.setAttribute(`class`, `game-board-row-${i+1}`);
+      console.log(boardRowDiv);
+      for(let j = 0; j < columns; j++) {
+        const boardRowCell = document.createElement(`button`);
+        boardRowCell.classList.add(`game-board-cell`, `game-board-column-${j+1}`);
+        boardRowCell.setAttribute(`type`, `button`);
+        boardRowCell.setAttribute(`data-row`, `${i}`);
+        boardRowCell.setAttribute(`data-column`, `${j}`);
+        boardRowDiv.append(boardRowCell);
+        gameBoardDisplay.append(boardRowDiv);
+      }
+    }
+  }
+  const makeMove = (movePosition) => {
+    console.log(movePosition);
+  }
+  return { printBoard, makeMove };
 })();
 
 // Your players are also going to be stored in objects,
@@ -26,13 +42,19 @@ const createPlayer = (playerName, playerGamePiece) => {
 }
 
 const  displayController = (() => {
+  gameBoard.printBoard();
+  const boardCells = document.querySelectorAll(`[data-row]`);
+  boardCells.forEach((cell) => {
+    cell.addEventListener((`click`), (e) => {
+      const movePosition = [cell.getAttribute(`data-row`), cell.getAttribute(`data-column`)];
+      gameBoard.makeMove([movePosition]);
+    });
+  });
 })();
 
 const gameController = (() => {
- const playerOne = createPlayer(`Nolan`,`X`);
- const playerTwo = createPlayer(`Kayla`,`O`);
- console.log(`${playerOne.name}   ${ playerTwo.name}`);
-
+  const playerOne = createPlayer(`Nolan`,`X`);
+  const playerTwo = createPlayer(`Kayla`,`O`);
 })();
 
 

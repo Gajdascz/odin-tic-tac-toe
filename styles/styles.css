@@ -1,0 +1,108 @@
+:root {
+  --primary-color: #fef2f2;
+  --primary-accent: #f87171;
+  --primary-accent-2: #cec7c7;
+  --secondary-color: #b91c1c;
+  --secondary-accent: black;
+  
+  background-color: var(--primary-color);
+  cursor: default;
+}
+
+.layout-container { 
+  display: grid;
+  grid-template-rows: auto auto auto;
+  grid-template-areas: 
+  "header"
+  "main"
+  "footer";
+}
+.header-container {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-size: 1.5rem;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  box-shadow: 0 0 15px 3px var(--secondary-accent);
+  margin-bottom: 50px;
+}
+button {
+  border: none;
+  cursor: pointer;  
+}
+
+
+
+.main-container {
+  grid-area: main;
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: min-content min-content;
+  place-items: center;
+  grid-template-areas: 
+  "turn-display"
+  "game-board-container";
+}
+.turn-display {
+  grid-area: turn-display;
+}
+.game-board-container {
+  grid-area: game-board-container;
+  display: grid;
+  grid-template-rows: auto auto auto;
+}
+
+.game-board-cell {
+  width: 125px;
+  height: 125px;
+  background-color: var(--primary-accent-2);
+}
+.game-board-cell:hover {
+  background-color: var(--primary-accent);
+}
+.game-board-row-1{
+  grid-row: 2;
+  border-bottom: 5px solid var(--secondary-color);
+  display: flex;
+}
+.game-board-row-2 {
+  grid-row: 3;
+  border-bottom: 5px solid var(--secondary-color);
+  display: flex;
+}
+.game-board-row-3 {
+  grid-row: 4;
+  display: flex;
+}
+
+.game-board-column-2 {
+  border-right: 5px solid var(--secondary-color);
+  border-left: 5px solid var(--secondary-color);
+  width: 135px;
+}
+
+
+.footer-container {
+  grid-area: footer;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.github-logo-link {
+  width: 40px;
+  fill: var(--primary-color);
+}
+.github-logo-link:hover {
+  fill: var(--secondary-accent);
+}
