@@ -59,9 +59,15 @@ const  displayController = (() => {
       gameBoard.makeMove(movePosition);
     });
   });
-  const difficultySelector = ()=>{
+    const typeDifficultySelect = document.querySelectorAll(`.type-difficulty-container`);
+    typeDifficultySelect.forEach((container, index ) => {
+      container.addEventListener((`change`), (e) => {
+        const typeSelected = container.querySelector(`select.player-type-select`).value;
+        console.log(typeSelected);
+        typeSelected === `computer` ? container.querySelector(`select.difficulty-select`).setAttribute(`disabled`, `true`) : container.querySelector(`select.difficulty-select`).removeAttribute(`disabled`);
 
-  }
+      });
+    });
 })();
 
 
