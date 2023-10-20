@@ -136,8 +136,20 @@ button {
 #information-options-dialog {
   width: 75%;
 }
-#information-options-dialog h1 {
-  text-align: center;
+
+
+form#information-options-form {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 25px;
+  row-gap: 15px;
+}
+#information-options-form h1 {
+  grid-column: 1 / -1;
+  justify-self: center;
+  font-size: 2rem;
+  font-weight: bolder;
 }
 .dialog-select {
   width: 100%;
@@ -147,28 +159,26 @@ button {
   width: 100%;
   justify-content: space-between;
 }
-.dialog-text-input,
-.dialog-select {
-  border-radius: 5px;
-  border: 1px solid var(--secondary-accent);
-}
 .dialog-text-input:focus,
 .dialog-select:focus {
   background-color: var(--primary-color);
 }
 
-form#information-options-form {
-  display: grid;
-  grid-auto-flow: row;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 25px;
-  row-gap: 15px;
+.dialog-text-input,
+.dialog-select {
+  border-radius: 5px;
+  border: 1px solid var(--secondary-accent);
+  font-size: 1.25rem;
 }
 .player-one-information-container,
 .player-two-information-container {
   text-align: center;
   gap: 8px;
-  font-size: 1.5rem;
+}
+.player-one-information-container h2,
+.player-two-information-container h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
 }
 .player-one-information-container {
   grid-column: 1;
