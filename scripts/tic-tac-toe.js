@@ -7,30 +7,15 @@ const gameBoard = (() => {
   for(let i = 0; i < rows; i++) {
     boardArray[i] = [];
     for(let j = 0; j < columns; j++) {
-      boardArray[i].push('null');
+      boardArray[i].push(null);
     }
   }
-  const printBoard = () => {
-    const gameBoardDisplay = document.querySelector(`.game-board-container`);
-    for(let i = 0; i < rows; i++) { 
-      const boardRowDiv = document.createElement(`div`);
-      boardRowDiv.setAttribute(`class`, `game-board-row-${i+1}`);
-      console.log(boardRowDiv);
-      for(let j = 0; j < columns; j++) {
-        const boardRowCell = document.createElement(`button`);
-        boardRowCell.classList.add(`game-board-cell`, `game-board-column-${j+1}`);
-        boardRowCell.setAttribute(`type`, `button`);
-        boardRowCell.setAttribute(`data-row`, `${i}`);
-        boardRowCell.setAttribute(`data-column`, `${j}`);
-        boardRowDiv.append(boardRowCell);
-        gameBoardDisplay.append(boardRowDiv);
-      }
-    }
-  }
+  const getBoard = () => boardArray;
   const makeMove = (movePosition) => {
-    console.log(movePosition);
+    !boardArray[movePosition[0]][movePosition[1]] ? boardArray[movePosition[0]][movePosition[1]] = `X` : alert(`Please choose an open spot!`);
+    console.log(boardArray);
   }
-  return { printBoard, makeMove };
+  return { getBoard, makeMove };
 })();
 
 // Your players are also going to be stored in objects,
@@ -40,22 +25,46 @@ const createPlayer = (playerName, playerGamePiece) => {
 
   return { name, gamePiece };
 }
+const gameController = (() => {
+  const playerOne = createPlayer(`Nolan`,`X`);
+  const playerTwo = createPlayer(`Kayla`,`O`);
+  const gamePlayers = { playerOne, playerTwo };
+
+
+  console.log(gamePlayers);
+})();
 
 const  displayController = (() => {
-  gameBoard.printBoard();
+  const loadDialog = document.querySelector(`#information-options-dialog`);
+  loadDialog.showModal();
+  const currentBoard = gameBoard.getBoard();
+  const gameBoardDisplay = document.querySelector(`.game-board-container`);
+  for(let i = 0; i < currentBoard.length; i++) { 
+    const boardRowDiv = document.createElement(`div`);
+    boardRowDiv.setAttribute(`class`, `game-board-row-${i+1}`);
+    for(let j = 0; j < currentBoard[i].length; j++) {
+      const boardRowCell = document.createElement(`button`);
+      boardRowCell.classList.add(`game-board-cell`, `game-board-column-${j+1}`);
+      boardRowCell.setAttribute(`type`, `button`);
+      boardRowCell.setAttribute(`data-row`, `${i}`);
+      boardRowCell.setAttribute(`data-column`, `${j}`);
+      boardRowDiv.append(boardRowCell);
+      gameBoardDisplay.append(boardRowDiv);
+    }
+  }
   const boardCells = document.querySelectorAll(`[data-row]`);
   boardCells.forEach((cell) => {
     cell.addEventListener((`click`), (e) => {
       const movePosition = [cell.getAttribute(`data-row`), cell.getAttribute(`data-column`)];
-      gameBoard.makeMove([movePosition]);
+      gameBoard.makeMove(movePosition);
     });
   });
+  const difficultySelector = ()=>{
+
+  }
 })();
 
-const gameController = (() => {
-  const playerOne = createPlayer(`Nolan`,`X`);
-  const playerTwo = createPlayer(`Kayla`,`O`);
-})();
+
 
 
 

@@ -17,6 +17,10 @@
   "main"
   "footer";
 }
+
+
+
+
 .header-container {
   grid-area: header;
   display: flex;
@@ -105,4 +109,59 @@ button {
 }
 .github-logo-link:hover {
   fill: var(--secondary-accent);
+}
+
+
+
+
+#information-options-dialog {
+  width: 75%;
+}
+#information-options-dialog h1 {
+  text-align: center;
+}
+.dialog-select {
+  width: 100%;
+}
+.type-difficulty-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+form#information-options-form {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 25px;
+  row-gap: 15px;
+}
+.player-one-information-container,
+.player-two-information-container {
+  text-align: center;
+  gap: 8px;
+  font-size: 1.2rem;
+}
+.player-one-information-container {
+  grid-column: 1;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+}
+.player-two-information-container {
+  grid-column: 2;
+  justify-self: baseline;
+  display: flex;
+  flex-direction: column;
+}
+.information-submit-button {
+  grid-column: 1/-1;
+  justify-self: center;
+  width: 25%;
+  padding: 10px;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  font-size: 1.75rem;
+  font-weight: bold;
+  border-radius: 10px;
 }
