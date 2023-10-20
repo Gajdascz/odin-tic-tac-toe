@@ -17,6 +17,10 @@
   "main"
   "footer";
 }
+button {
+  border: none;
+  cursor: pointer;  
+}
 
 
 
@@ -24,8 +28,7 @@
 .header-container {
   grid-area: header;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 20px;
   font-size: 1.5rem;
@@ -34,11 +37,27 @@
   box-shadow: 0 0 15px 3px var(--secondary-accent);
   margin-bottom: 50px;
 }
-button {
-  border: none;
-  cursor: pointer;  
+.player-options-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
+  font-size: 1.2rem;
+  border: 5px solid var(--secondary-accent);
+  border-radius: 10px;
 }
-
+.player-options-button:hover,
+.player-options-button:hover svg{
+  background-color: var(--primary-accent);
+  color: var(--secondary-accent);
+  border-color: var(--primary-color);
+  fill: var(--secondary-accent);
+}
+.player-options-icon {
+  width: 40px;
+  fill: var(--secondary-color);
+}
 
 
 .main-container {
@@ -128,6 +147,15 @@ button {
   width: 100%;
   justify-content: space-between;
 }
+.dialog-text-input,
+.dialog-select {
+  border-radius: 5px;
+  border: 1px solid var(--secondary-accent);
+}
+.dialog-text-input:focus,
+.dialog-select:focus {
+  background-color: var(--primary-color);
+}
 
 form#information-options-form {
   display: grid;
@@ -140,7 +168,7 @@ form#information-options-form {
 .player-two-information-container {
   text-align: center;
   gap: 8px;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 }
 .player-one-information-container {
   grid-column: 1;
@@ -154,14 +182,28 @@ form#information-options-form {
   display: flex;
   flex-direction: column;
 }
-.information-submit-button {
-  grid-column: 1/-1;
-  justify-self: center;
-  width: 25%;
+
+.information-submit-button,
+.information-close-button {
+  grid-column: 1;
+  justify-self: end;
+  width: 60%;
   padding: 10px;
   background-color: var(--secondary-color);
   color: var(--primary-color);
   font-size: 1.75rem;
   font-weight: bold;
   border-radius: 10px;
+  border: 5px solid var(--secondary-accent);
+}
+.information-close-button {
+  grid-column: 2;
+  justify-self: baseline;
+}
+
+.information-submit-button:hover,
+.information-close-button:hover {
+  background-color: var(--secondary-accent);
+  color: var(--primary-color);
+  border-color: var(--secondary-color)
 }

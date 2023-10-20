@@ -35,8 +35,6 @@ const gameController = (() => {
 })();
 
 const  displayController = (() => {
-  const loadDialog = document.querySelector(`#information-options-dialog`);
-  loadDialog.showModal();
   const currentBoard = gameBoard.getBoard();
   const gameBoardDisplay = document.querySelector(`.game-board-container`);
   for(let i = 0; i < currentBoard.length; i++) { 
@@ -59,18 +57,28 @@ const  displayController = (() => {
       gameBoard.makeMove(movePosition);
     });
   });
-    const typeDifficultySelect = document.querySelectorAll(`.type-difficulty-container`);
-    typeDifficultySelect.forEach((container, index ) => {
-      container.addEventListener((`change`), (e) => {
-        const typeSelected = container.querySelector(`select.player-type-select`).value;
-        console.log(typeSelected);
-        typeSelected === `computer` ? container.querySelector(`select.difficulty-select`).setAttribute(`disabled`, `true`) : container.querySelector(`select.difficulty-select`).removeAttribute(`disabled`);
-
-      });
-    });
 })();
 
 
+const playerOptionsController = (() => {
+  const loadDialog = document.querySelector(`#information-options-dialog`);
+  loadDialog.showModal();
+  const playerInformationSubmit = document.querySelector(`.information-close-button`);
+  playerInformationSubmit.addEventListener((`click`), (e) => {
+    loadDialog.close();
+  });
+  const playerOptionsButton = document.querySelector(`.player-options-button`);
+  playerOptionsButton.addEventListener((`click`), (e) => {
+    loadDialog.showModal();
+  });
+  const typeDifficultySelect = document.querySelectorAll(`.type-difficulty-container`);
+  typeDifficultySelect.forEach((container) => {
+    container.addEventListener((`change`), (e) => {
+      const typeSelected = container.querySelector(`select.player-type-select`).value;
+      typeSelected === `human` ? container.querySelector(`select.difficulty-select`).setAttribute(`disabled`, `true`) : container.querySelector(`select.difficulty-select`).removeAttribute(`disabled`);
+    });
+  });
+})();
 
 
 
