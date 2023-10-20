@@ -19,20 +19,14 @@ const gameBoard = (() => {
 })();
 
 // Your players are also going to be stored in objects,
-const createPlayer = (playerName, playerGamePiece) => {
+const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty) => {
   const name = playerName;
   const gamePiece = playerGamePiece;
-
-  return { name, gamePiece };
+  const type = playerType;
+  const difficulty = selectedDifficulty;
+  return { name, gamePiece, playerType, difficulty };
 }
-const gameController = (() => {
-  const playerOne = createPlayer(`Nolan`,`X`);
-  const playerTwo = createPlayer(`Kayla`,`O`);
-  const gamePlayers = { playerOne, playerTwo };
 
-
-  console.log(gamePlayers);
-})();
 
 const  displayController = (() => {
   const currentBoard = gameBoard.getBoard();
@@ -61,16 +55,40 @@ const  displayController = (() => {
 
 
 const playerOptionsController = (() => {
+  const gamePlayers = [];
+
   const loadDialog = document.querySelector(`#information-options-dialog`);
   loadDialog.showModal();
-  const playerInformationSubmit = document.querySelector(`.information-close-button`);
+
+  const playerInformationSubmit = document.querySelector(`.information-submit-button`);
   playerInformationSubmit.addEventListener((`click`), (e) => {
-    loadDialog.close();
+    const playerOne = createPlayer(
+      loadDialog.querySelector(`input#player-one-name`).value.trim() === `` ? 'enigma' : loadDialog.querySelector(`input#player-one-name`).value.trim(),
+      loadDialog.querySelector(`input#player-one-game-piece`).value.trim() === `` ? `?` : loadDialog.querySelector(`input#player-one-game-piece`).value.trim(),
+      loadDialog.querySelector(`select#player-one-type`).value,
+      loadDialog.querySelector(`select#player-one-difficulty`).value
+    );
+    const playerTwo = createPlayer(
+      loadDialog.querySelector(`input#player-two-name`).value.trim() === `` ? 'amgine' : loadDialog.querySelector(`input#player-two-name`).value.trim(),
+      loadDialog.querySelector(`input#player-two-game-piece`).value.trim() === `` ? `¿` : loadDialog.querySelector(`input#player-two-game-piece`).value.trim(),
+      loadDialog.querySelector(`select#player-two-type`).value,
+      loadDialog.querySelector(`select#player-two-difficulty`).value
+    );
+    gamePlayers.length = 0;
+    gamePlayers.push(playerOne, playerTwo);
+    gameController(gamePlayers);
+    loadDialog.close()
   });
+
   const playerOptionsButton = document.querySelector(`.player-options-button`);
   playerOptionsButton.addEventListener((`click`), (e) => {
     loadDialog.showModal();
   });
+
+  loadDialog.addEventListener((`cancel`), (e) => {
+    e.preventDefault();
+  });
+
   const typeDifficultySelect = document.querySelectorAll(`.type-difficulty-container`);
   typeDifficultySelect.forEach((container) => {
     container.addEventListener((`change`), (e) => {
@@ -80,17 +98,6 @@ const playerOptionsController = (() => {
   });
 })();
 
-
-
-// and you’re probably going to want an object to control the flow of the game itself.
-      // Your main goal here is to have as little global code as possible. 
-      // Try tucking everything away inside of a module or factory. 
-      // Rule of thumb: if you only ever need ONE of something (gameBoard, displayController), use a module. If you need multiples of something (players!), create them with factories.
-
-
-
-
-      // Game starts, random player is chosen to go first.
-      // chosen first player picks an spot on the gameboard
-        // If the spot is empty, place their game piece. If the spot is taken, do nothing or tell them to choose another space
-      // repeat for second player until there's a win or tie.
+const gameController = ((gamePlayers) => {
+  console.log(gamePlayers);
+});

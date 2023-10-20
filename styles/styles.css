@@ -193,10 +193,9 @@ form#information-options-form {
   flex-direction: column;
 }
 
-.information-submit-button,
-.information-close-button {
-  grid-column: 1;
-  justify-self: end;
+.information-submit-button {
+  grid-column: 1 / -1;
+  justify-self: center;
   width: 60%;
   padding: 10px;
   background-color: var(--secondary-color);
@@ -206,13 +205,8 @@ form#information-options-form {
   border-radius: 10px;
   border: 5px solid var(--secondary-accent);
 }
-.information-close-button {
-  grid-column: 2;
-  justify-self: baseline;
-}
 
-.information-submit-button:hover,
-.information-close-button:hover {
+.information-submit-button:hover {
   background-color: var(--secondary-accent);
   color: var(--primary-color);
   border-color: var(--secondary-color)
