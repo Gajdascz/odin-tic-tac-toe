@@ -51,6 +51,9 @@ const  displayController = (() => {
       gameBoard.makeMove(movePosition);
     });
   });
+  const turnDisplay = document.querySelector(`h2.turn-display`);
+  const updateTurnDisplay = (currentPlayer) => turnDisplay.textContent = `${currentPlayer}'s Turn`;
+  return { updateTurnDisplay };
 })();
 
 
@@ -76,10 +79,9 @@ const playerOptionsController = (() => {
     );
     gamePlayers.length = 0;
     gamePlayers.push(playerOne, playerTwo);
-    gameController(gamePlayers);
     loadDialog.close()
+    gameController();
   });
-
   const playerOptionsButton = document.querySelector(`.player-options-button`);
   playerOptionsButton.addEventListener((`click`), (e) => {
     loadDialog.showModal();
@@ -96,8 +98,12 @@ const playerOptionsController = (() => {
       typeSelected === `human` ? container.querySelector(`select.difficulty-select`).setAttribute(`disabled`, `true`) : container.querySelector(`select.difficulty-select`).removeAttribute(`disabled`);
     });
   });
+  const getGamePlayers = () => gamePlayers; 
+  return { getGamePlayers };
 })();
 
-const gameController = ((gamePlayers) => {
-  console.log(gamePlayers);
+const gameController = (() => {
+  const gamePlayers = playerOptionsController.getGamePlayers();
+  let currentPlayer = Math.floor(Math.random()*gamePlayers.length) === 0 ? gamePlayers[0] : gamePlayers[1];
+  displayController.updateTurnDisplay(currentPlayer.name);
 });
