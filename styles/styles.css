@@ -11,17 +11,23 @@
 
 .layout-container { 
   display: grid;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto 1fr auto ;
   grid-template-areas: 
   "header"
   "main"
-  "footer";
+  "footer"
+  "filler";
 }
 button {
   border: none;
   cursor: pointer;  
 }
+.filler {
+  grid-area: filler;
+  background-color: var(--secondary-color);
+  height: 40vh;
 
+}
 
 
 
@@ -51,6 +57,7 @@ button {
 .player-options-button:hover svg{
   background-color: var(--primary-accent);
   color: var(--secondary-accent);
+  color: var(--secondary-accent);
   border-color: var(--primary-color);
   fill: var(--secondary-accent);
 }
@@ -62,7 +69,7 @@ button {
 
 .main-container {
   grid-area: main;
-  min-height: 100vh;
+  min-height: 60vh;
   display: grid;
   grid-template-rows: min-content min-content;
   place-items: center;
@@ -72,17 +79,27 @@ button {
 }
 .turn-display {
   grid-area: turn-display;
+  font-size: 2rem;
+  font-weight: bolder;
+  padding-bottom: 15px;
 }
 .game-board-container {
   grid-area: game-board-container;
   display: grid;
   grid-template-rows: auto auto auto;
+  place-self: center;
+  justify-self: center;
 }
 
 .game-board-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 125px;
   height: 125px;
+  padding: 5px;
   background-color: var(--primary-accent-2);
+  font-size: 6rem;
 }
 .game-board-cell:hover {
   background-color: var(--primary-accent);
@@ -119,11 +136,12 @@ button {
   background-color: var(--secondary-color);
   color: var(--primary-color);
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.8em;
+  margin-top: 25px;
 }
 
 .github-logo-link {
-  width: 40px;
+  width: 60px;
   fill: var(--primary-color);
 }
 .github-logo-link:hover {
@@ -135,6 +153,8 @@ button {
 
 #information-options-dialog {
   width: 75%;
+  border: 10px solid var(--secondary-accent);
+  border-radius: 10px;
 }
 
 
@@ -161,6 +181,7 @@ form#information-options-form {
 }
 .dialog-text-input:focus,
 .dialog-select:focus {
+  outline: 2px solid var(--secondary-accent);
   background-color: var(--primary-color);
 }
 

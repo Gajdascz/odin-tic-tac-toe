@@ -4,13 +4,16 @@ const gameBoard = (() => {
   const boardArray = [];
 
   const initBoard = (() => {
-  for(let i = 0; i < rows; i++) {
-    boardArray[i] = [];
-    for(let j = 0; j < columns; j++) {
-      boardArray[i].push(null);
+    for(let i = 0; i < rows; i++) {
+      boardArray[i] = [];
+      for(let j = 0; j < columns; j++) {
+        boardArray[i].push(null);
+      }
     }
+  });
+  const clearBoard = () => {
+    boardArray.length = 0;
   }
-});
   const getBoard = () => boardArray;
   const makeMove = (movePosition) => {
     if (!boardArray[movePosition[0]][movePosition[1]]) {
@@ -18,12 +21,12 @@ const gameBoard = (() => {
       return true;
     } else { return false; }
   }
-  const clearBoard = () => {
-    boardArray.length = 0;
-  }
+
   return { getBoard, makeMove, clearBoard, initBoard };
 })();
 
+// createPlayer Factory Function
+//#region
 const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty) => {
   const name = playerName;
   const gamePiece = playerGamePiece;
@@ -31,7 +34,9 @@ const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficult
   const difficulty = selectedDifficulty;
   return { name, gamePiece, playerType, difficulty };
 }
+//#endregion
 
+// playerOptionsController IIFE Module Object
 // #region
 const playerOptionsController = (() => {
   const gamePlayers = [];
@@ -57,6 +62,7 @@ const playerOptionsController = (() => {
     gamePlayers.push(playerOne, playerTwo);
     loadDialog.close()
     gameController.updateActiveGamePlayers(gamePlayers)
+    displayController.updateTurnDisplay(gameController.getCurrentPlayer().name);
   });
   const playerOptionsButton = document.querySelector(`.player-options-button`);
   playerOptionsButton.addEventListener((`click`), (e) => {
@@ -80,6 +86,7 @@ const playerOptionsController = (() => {
 })();
 // #endregion
 
+// displayController IIFE Module Object
 // #region
 const  displayController = (() => {
   gameBoard.initBoard();
@@ -102,7 +109,12 @@ const  displayController = (() => {
   boardCells.forEach((cell) => {
     cell.addEventListener((`click`), (e) => {
       const movePosition = [cell.getAttribute(`data-row`), cell.getAttribute(`data-column`)];
-      !gameBoard.makeMove(movePosition) ? alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`) : gameController.updateCurrentPlayer();
+      if(!gameBoard.makeMove(movePosition)) alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`);
+      else { 
+        cell.textContent = gameController.getCurrentPlayer().gamePiece;
+        gameController.updateCurrentPlayer();
+        updateTurnDisplay(gameController.getCurrentPlayer().name);
+      }
       console.log(gameController.checkBoard());
     });
   });
@@ -112,6 +124,9 @@ const  displayController = (() => {
 })();
 // #endregion
 
+
+// gameController IIFE Module Object
+// #region
 const gameController = (() => {
   const activeGamePlayers = [];
   let currentPlayer = null;
@@ -152,5 +167,6 @@ const gameController = (() => {
     }
     return result;
   }
-  return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, updateCurrentPlayer, checkBoard};
+  return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, updateCurrentPlayer, checkBoard };
 })();
+//#endregion
