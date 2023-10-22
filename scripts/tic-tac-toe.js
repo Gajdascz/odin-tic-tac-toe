@@ -23,7 +23,6 @@ const gameBoard = (() => {
 })();
 
 // createPlayer Factory Function
-//#region
 const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty) => {
   const name = playerName;
   const gamePiece = playerGamePiece;
@@ -31,10 +30,8 @@ const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficult
   const difficulty = selectedDifficulty;
   return { name, gamePiece, playerType, difficulty };
 }
-//#endregion
 
 // playerOptionsController IIFE Module Object
-// #region
 const playerOptionsController = (() => {
   const gamePlayers = [];
 
@@ -81,10 +78,8 @@ const playerOptionsController = (() => {
   const getFirstTurn = () => Math.floor(Math.random()*gamePlayers.length) === 0 ? gamePlayers[0] : gamePlayers[1];
   return { getGamePlayers, getFirstTurn, openOptionsMenu };
 })();
-// #endregion
 
 // displayController IIFE Module Object
-// #region
 const  displayController = (() => {
 
   gameBoard.initBoard();
@@ -136,10 +131,8 @@ const  displayController = (() => {
    }
   return { updateTurnDisplay, clearBoardDisplay };
 })();
-// #endregion
 
 // endRoundController IIFE Module
-//#region 
 const endRoundDialog = (() => { 
 
   const endRoundDialog = document.querySelector(`dialog#end-round-dialog`);
@@ -167,11 +160,8 @@ const endRoundDialog = (() => {
   });
   return { openEndRoundDialog }
  })();
-//#endregion
-
 
 // gameController IIFE Module Object
-// #region
 const gameController = (() => {
   const activeGamePlayers = [];
   let currentPlayer = null;
@@ -228,4 +218,3 @@ const gameController = (() => {
   }
   return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, updateCurrentPlayer, checkBoard, startNewGame };
 })();
-//#endregion
