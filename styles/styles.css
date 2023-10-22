@@ -49,7 +49,8 @@ button {
   align-items: center;
   color: var(--secondary-color);
   background-color: var(--primary-color);
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: bolder;
   border: 5px solid var(--secondary-accent);
   border-radius: 10px;
 }
@@ -62,7 +63,7 @@ button {
   fill: var(--secondary-accent);
 }
 .player-options-icon {
-  width: 40px;
+  width: 50px;
   fill: var(--secondary-color);
 }
 
@@ -75,11 +76,12 @@ button {
   place-items: center;
   grid-template-areas: 
   "turn-display"
-  "game-board-container";
+  "game-board-container"
+  ;
 }
 .turn-display {
   grid-area: turn-display;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: bolder;
   padding-bottom: 15px;
 }
@@ -90,7 +92,6 @@ button {
   place-self: center;
   justify-self: center;
 }
-
 .game-board-cell {
   display: flex;
   justify-content: center;
@@ -118,7 +119,6 @@ button {
   grid-row: 4;
   display: flex;
 }
-
 .game-board-column-2 {
   border-right: 5px solid var(--secondary-color);
   border-left: 5px solid var(--secondary-color);
@@ -137,9 +137,8 @@ button {
   color: var(--primary-color);
   font-weight: bold;
   font-size: 1.8em;
-  margin-top: 25px;
+  margin-top: 10px;
 }
-
 .github-logo-link {
   width: 60px;
   fill: var(--primary-color);
@@ -150,7 +149,8 @@ button {
 
 
 
-
+/* Player Information Dialog Form*/
+/* #region */
 #information-options-dialog {
   width: 75%;
   border: 10px solid var(--secondary-accent);
@@ -232,3 +232,38 @@ form#information-options-form {
   color: var(--primary-color);
   border-color: var(--secondary-color)
 }
+/* #endregion */
+
+/* End Round Dialog */
+/* #region */
+#end-round-dialog[open] {
+  width: 50%;
+  border: 10px solid var(--secondary-accent);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#end-round-dialog .end-round-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+#end-round-dialog .end-round-buttons-container > button {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  font-size: 1.75rem;
+  font-weight: bold;
+  border-radius: 10px;
+  border: 5px solid var(--secondary-accent);
+}
+
+#end-round-dialog .end-round-buttons-container > button:hover{
+  background-color: var(--secondary-accent);
+  color: var(--primary-color);
+  border-color: var(--secondary-color)
+}
+/* #endregion */

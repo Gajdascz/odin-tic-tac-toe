@@ -11,9 +11,6 @@ const gameBoard = (() => {
       }
     }
   });
-  const clearBoard = () => {
-    boardArray.length = 0;
-  }
   const getBoard = () => boardArray;
   const makeMove = (movePosition) => {
     if (!boardArray[movePosition[0]][movePosition[1]]) {
@@ -22,7 +19,7 @@ const gameBoard = (() => {
     } else { return false; }
   }
 
-  return { getBoard, makeMove, clearBoard, initBoard };
+  return { getBoard, makeMove, initBoard };
 })();
 
 // createPlayer Factory Function
@@ -44,6 +41,10 @@ const playerOptionsController = (() => {
   const loadDialog = document.querySelector(`#information-options-dialog`);
   loadDialog.showModal();
 
+  const openOptionsMenu = () => {
+    loadDialog.showModal();
+  }
+
   const playerInformationSubmit = document.querySelector(`.information-submit-button`);
   playerInformationSubmit.addEventListener((`click`), (e) => {
     const playerOne = createPlayer(
@@ -60,15 +61,11 @@ const playerOptionsController = (() => {
     );
     gamePlayers.length = 0;
     gamePlayers.push(playerOne, playerTwo);
-    loadDialog.close()
-    gameController.updateActiveGamePlayers(gamePlayers)
+    loadDialog.close();
+    gameController.updateActiveGamePlayers(gamePlayers);
+    gameController.startNewGame();
     displayController.updateTurnDisplay(gameController.getCurrentPlayer().name);
   });
-  const playerOptionsButton = document.querySelector(`.player-options-button`);
-  playerOptionsButton.addEventListener((`click`), (e) => {
-    loadDialog.showModal();
-  });
-
   loadDialog.addEventListener((`cancel`), (e) => {
     e.preventDefault();
   });
@@ -82,16 +79,17 @@ const playerOptionsController = (() => {
   });
   const getGamePlayers = () => gamePlayers; 
   const getFirstTurn = () => Math.floor(Math.random()*gamePlayers.length) === 0 ? gamePlayers[0] : gamePlayers[1];
-  return { getGamePlayers, getFirstTurn };
+  return { getGamePlayers, getFirstTurn, openOptionsMenu };
 })();
 // #endregion
 
 // displayController IIFE Module Object
 // #region
 const  displayController = (() => {
+
   gameBoard.initBoard();
-  const currentBoard = gameBoard.getBoard();
   const gameBoardDisplay = document.querySelector(`.game-board-container`);
+  const currentBoard = gameBoard.getBoard();
   for(let i = 0; i < currentBoard.length; i++) { 
     const boardRowDiv = document.createElement(`div`);
     boardRowDiv.setAttribute(`class`, `game-board-row-${i+1}`);
@@ -112,17 +110,64 @@ const  displayController = (() => {
       if(!gameBoard.makeMove(movePosition)) alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`);
       else { 
         cell.textContent = gameController.getCurrentPlayer().gamePiece;
-        gameController.updateCurrentPlayer();
-        updateTurnDisplay(gameController.getCurrentPlayer().name);
+        if(!gameController.checkBoard()) {
+          gameController.updateCurrentPlayer();
+          updateTurnDisplay(gameController.getCurrentPlayer().name); 
+        } else {
+          const result = gameController.checkBoard() === `tie` ?  `Tie` : gameController.getCurrentPlayer().name; 
+          endRoundDialog.openEndRoundDialog(result);
+        }
       }
-      console.log(gameController.checkBoard());
     });
   });
+
+  const playerOptionsButton = document.querySelector(`.player-options-button`);
+  playerOptionsButton.addEventListener((`click`), (e) => {
+    playerOptionsController.openOptionsMenu();
+  });
+
   const turnDisplay = document.querySelector(`h2.turn-display`);
   const updateTurnDisplay = (currentPlayer) => turnDisplay.textContent = `${currentPlayer}'s Turn`;
-  return { updateTurnDisplay };
+  
+   const clearBoardDisplay = () => {
+    boardCells.forEach((cell) => {
+      cell.textContent = ``;
+    });
+   }
+  return { updateTurnDisplay, clearBoardDisplay };
 })();
 // #endregion
+
+// endRoundController IIFE Module
+//#region 
+const endRoundDialog = (() => { 
+
+  const endRoundDialog = document.querySelector(`dialog#end-round-dialog`);
+  const resultDisplay = endRoundDialog.querySelector(`.end-round-result`);
+  const openEndRoundDialog = (result) => {
+    endRoundDialog.showModal();
+    if(result === `Tie`) resultDisplay.textContent = result;
+    else result ? resultDisplay.textContent = `${result} Wins!` : resultDisplay.textContent = `Sneaky Insubordinate`;
+  }
+
+  const playAgainButton = endRoundDialog.querySelector(`.end-round-play-again-button`);
+  playAgainButton.addEventListener((`click`), (e) => {
+    gameController.startNewGame();
+    endRoundDialog.close();
+  });
+
+  const openOptionsButton = endRoundDialog.querySelector(`.end-round-open-options-button`);
+  openOptionsButton.addEventListener((`click`), (e) => {
+    endRoundDialog.close();
+    playerOptionsController.openOptionsMenu();
+  });
+
+  endRoundDialog.addEventListener((`cancel`), (e) => {
+    e.preventDefault();
+  });
+  return { openEndRoundDialog }
+ })();
+//#endregion
 
 
 // gameController IIFE Module Object
@@ -142,6 +187,14 @@ const gameController = (() => {
   const checkBoard = () => {
     let result = false;
     const currentBoard = gameBoard.getBoard();
+    const checkTie = (board) => {
+      return (
+        !board[0].includes(null) &&
+        !board[1].includes(null) &&
+        !board[2].includes(null)
+      
+      ); 
+    }
     const checkRow = (board, row) => {
       return board[row].includes(null) ? false : (board[row][0] === board[row][1] && board[row][0] === board[row][2]);
     }
@@ -161,12 +214,18 @@ const gameController = (() => {
                   );
     }
     for(let i = 0; i < currentBoard.length; i++) {
-      checkRow(currentBoard, i)     ? result = true : false;
-      checkColumn(currentBoard, i)  ? result = true : false;
-      checkDiagonal(currentBoard)   ? result = true : false;
+      checkTie(currentBoard)        ? result = `tie` : false;
+      checkRow(currentBoard, i)     ? result = true  : false;
+      checkColumn(currentBoard, i)  ? result = true  : false;
+      checkDiagonal(currentBoard)   ? result = true  : false;
     }
     return result;
   }
-  return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, updateCurrentPlayer, checkBoard };
+
+  const startNewGame = () => {
+    displayController.clearBoardDisplay();
+    gameBoard.initBoard();
+  }
+  return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, updateCurrentPlayer, checkBoard, startNewGame };
 })();
 //#endregion
