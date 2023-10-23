@@ -91,6 +91,12 @@ aside.session-information-container > h3 {
   text-align: center;
   padding: 15px;
   font-size: 1.75rem;
+  font-weight: bolder;
+}
+.session-totals > h4 {
+  font-weight: bolder;
+  font-size: 1.5rem;
+  padding-bottom: 5px;
 }
 aside.session-information-container .player-one-session,
 aside.session-information-container .player-two-session,

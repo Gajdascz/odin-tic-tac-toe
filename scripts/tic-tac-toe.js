@@ -28,13 +28,15 @@ const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficult
   const gamePiece = playerGamePiece;
   const type = playerType;
   const difficulty = selectedDifficulty;
-  return { name, gamePiece, playerType, difficulty };
+  const wins = 0;
+  const losses = 0;
+  const moves = 0;
+  return { name, gamePiece, playerType, difficulty, wins, losses, moves };
 }
 
 // playerOptionsController IIFE Module Object
 const playerOptionsController = (() => {
   const gamePlayers = [];
-
   const loadDialog = document.querySelector(`#information-options-dialog`);
   loadDialog.showModal();
 
@@ -58,10 +60,11 @@ const playerOptionsController = (() => {
     );
     gamePlayers.length = 0;
     gamePlayers.push(playerOne, playerTwo);
-    loadDialog.close();
     gameController.updateActiveGamePlayers(gamePlayers);
     gameController.startNewGame();
     displayController.updateTurnDisplay(gameController.getCurrentPlayer().name);
+    playerSessionController.initInfoDisplay(gamePlayers);
+    loadDialog.close();
   });
   loadDialog.addEventListener((`cancel`), (e) => {
     e.preventDefault();
@@ -105,14 +108,25 @@ const  displayController = (() => {
       if(!gameBoard.makeMove(movePosition)) alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`);
       else { 
         cell.textContent = gameController.getCurrentPlayer().gamePiece;
+        playerSessionController.incrementMoves(gameController.getCurrentPlayer());
+        playerSessionController.updateSessionInfoDisplay(gameController.getActiveGamePlayers());
         if(!gameController.checkBoard()) {
           gameController.updateCurrentPlayer();
           updateTurnDisplay(gameController.getCurrentPlayer().name); 
         } else {
-          const result = gameController.checkBoard() === `tie` ?  `Tie` : gameController.getCurrentPlayer().name; 
+          const result = gameController.checkBoard() === `tie` ?  `Tie` : gameController.getCurrentPlayer().name;
+          if (result === `Tie`) { 
+            playerSessionController.incrementTies();
+          } 
+          else  {
+            playerSessionController.incrementWins(gameController.getCurrentPlayer());
+            playerSessionController.incrementLosses(gameController.getInactivePlayer()); 
+          }
+          playerSessionController.updateSessionInfoDisplay(gameController.getActiveGamePlayers());
           endRoundDialog.openEndRoundDialog(result);
         }
       }
+
     });
   });
 
@@ -124,6 +138,7 @@ const  displayController = (() => {
   const turnDisplay = document.querySelector(`h2.turn-display`);
   const updateTurnDisplay = (currentPlayer) => turnDisplay.textContent = `${currentPlayer}'s Turn`;
   
+
    const clearBoardDisplay = () => {
     boardCells.forEach((cell) => {
       cell.textContent = ``;
@@ -161,18 +176,101 @@ const endRoundDialog = (() => {
   return { openEndRoundDialog }
  })();
 
+// playerSessionController IIFE Module
+const playerSessionController = (() => {
+  const playerOneSessionContainer = document.querySelector(`.player-one-session`);
+  const playerTwoSessionContainer = document.querySelector(`.player-two-session`);
+  const p1SessionName = playerOneSessionContainer.querySelector(`.p1-session-name`);
+  const p1SessionType = playerOneSessionContainer.querySelector(`.p1-session-type`);
+  const p1SessionDifficulty = playerOneSessionContainer.querySelector(`.p1-session-difficulty`);
+  const p1SessionPiece = playerOneSessionContainer.querySelector(`.p1-session-gp`);
+  const p1Wins = playerOneSessionContainer.querySelector(`.p1-session-wins`);
+  const p1Losses = playerOneSessionContainer.querySelector(`.p1-session-losses`);
+  const p1Moves = playerOneSessionContainer.querySelector(`.p1-session-moves`);
+
+  const p2SessionName = playerTwoSessionContainer.querySelector(`.p2-session-name`);
+  const p2SessionType = playerTwoSessionContainer.querySelector(`.p2-session-type`);
+  const p2SessionDifficulty = playerTwoSessionContainer.querySelector(`.p2-session-difficulty`);
+  const p2SessionPiece = playerTwoSessionContainer.querySelector(`.p2-session-gp`);
+  const p2Wins = playerTwoSessionContainer.querySelector(`.p2-session-wins`);
+  const p2Losses = playerTwoSessionContainer.querySelector(`.p2-session-losses`);
+  const p2Moves = playerTwoSessionContainer.querySelector(`.p2-session-moves`);
+
+
+  const sessionTotalsContainer = document.querySelector(`.session-totals`);
+  const totalTies = sessionTotalsContainer.querySelector(`.session-total-ties`);
+  const totalGames = sessionTotalsContainer.querySelector(`.session-total-games`);
+  const totalMoves = sessionTotalsContainer.querySelector(`.session-total-moves`);
+
+  let ties = 0;
+
+  const initInfoDisplay = (gamePlayers) => {
+    const p1 = gamePlayers[0];
+    const p2 = gamePlayers[1];
+
+
+    p1SessionName.textContent = p1.name;
+    p1SessionType.textContent = p1.playerType;
+    p1.playerType === `computer` ? p1SessionDifficulty.textContent = `(${p1.difficulty})` : ``;
+    p1SessionPiece.textContent = ` - [${p1.gamePiece}]`;
+
+    p2SessionName.textContent = p2.name;
+    p2SessionType.textContent = p2.playerType;
+    p2.playerType === `computer` ? p2SessionDifficulty.textContent = `(${p2.difficulty})` : ``;
+    p2SessionPiece.textContent = ` - [${p2.gamePiece}]`;
+    ties = 0;
+    updateSessionInfoDisplay(gamePlayers);
+  }
+
+  const updateSessionInfoDisplay = (gamePlayers) => {
+    const p1 = gamePlayers [0];
+    const p2 = gamePlayers [1];
+    const games = +p1.wins + +p1.losses + +ties;
+    const moves = +p1.moves + +p2.moves; 
+    
+    p1Wins.textContent = p1.wins;
+    p1Losses.textContent = p1.losses;
+    p1Moves.textContent = p1.moves;
+
+    p2Wins.textContent = p2.wins;
+    p2Losses.textContent = p2.losses;
+    p2Moves.textContent = p2.moves;
+
+    totalTies.textContent = ties;
+    totalGames.textContent = games;
+    totalMoves.textContent = moves;
+  }
+
+  const incrementMoves = (player) => {
+    player.moves++;
+  }
+  const incrementWins = (player) => {
+    player.wins++;
+  }
+  const incrementLosses = (player) => {
+    player.losses++;
+  }
+  const incrementTies = () => {
+    ties++;
+  }
+  return { initInfoDisplay, updateSessionInfoDisplay, incrementMoves, incrementWins, incrementLosses, incrementTies };
+})();
+
 // gameController IIFE Module Object
 const gameController = (() => {
   const activeGamePlayers = [];
   let currentPlayer = null;
+  let inactivePlayer = null;
   const updateActiveGamePlayers = (gamePlayers) => {
     activeGamePlayers.length = 0;
     activeGamePlayers.push(gamePlayers[0], gamePlayers[1]);
     currentPlayer = playerOptionsController.getFirstTurn();
   }
-  const updateCurrentPlayer = () => currentPlayer === activeGamePlayers[0] ? currentPlayer = activeGamePlayers[1] : currentPlayer = activeGamePlayers[0];
+  const updateCurrentPlayer = () => currentPlayer === activeGamePlayers[0] ? (currentPlayer = activeGamePlayers[1], inactivePlayer = activeGamePlayers[0]) : (currentPlayer = activeGamePlayers[0], inactivePlayer = activeGamePlayers[1]);
   const getActiveGamePlayers = () => activeGamePlayers;
   const getCurrentPlayer = () => currentPlayer;
+  const getInactivePlayer = () => inactivePlayer;
+
 
   const checkBoard = () => {
     let result = false;
@@ -216,5 +314,5 @@ const gameController = (() => {
     displayController.clearBoardDisplay();
     gameBoard.initBoard();
   }
-  return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, updateCurrentPlayer, checkBoard, startNewGame };
+  return { updateActiveGamePlayers, getActiveGamePlayers, getCurrentPlayer, getInactivePlayer, updateCurrentPlayer, checkBoard, startNewGame };
 })();
