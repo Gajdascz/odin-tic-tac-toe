@@ -12,11 +12,9 @@ const gameBoard = (() => {
     }
   });
   const getBoard = () => boardArray;
-  const makeMove = (movePosition) => {
+  const makeMove = (movePosition, gamePiece) => {
     if (!boardArray[movePosition[0]][movePosition[1]]) {
-      boardArray[movePosition[0]][movePosition[1]] = gameController.getCurrentPlayer().gamePiece
-      displayController.updateBoardDisplay(movePosition);
-      gameController.checkResult();
+      boardArray[movePosition[0]][movePosition[1]] = gamePiece
       return true;
     } else { return false; }
   }
@@ -268,14 +266,15 @@ const gameController = (() => {
     currentPlayer = Math.floor(Math.random()*activeGamePlayers.length) === 0 ? activeGamePlayers[0] : activeGamePlayers[1];
   }
   const checkMove = (movePosition) => {
-    if(!gameBoard.makeMove(movePosition)) {
+    if(!gameBoard.makeMove(movePosition, currentPlayer.gamePiece)) {
       alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`)
       return false;
     } else { 
-      gameBoard.makeMove(movePosition);
+      gameBoard.makeMove(movePosition, currentPlayer.gamePiece);
+      displayController.updateBoardDisplay(movePosition);
       playerSessionController.incrementMoves(getCurrentPlayer());
       playerSessionController.updateSessionInfo(getActiveGamePlayers());
-      !checkBoard() ? updateCurrentPlayer() : ``;
+      !checkBoard() ? updateCurrentPlayer() : checkResult();
       displayController.updateTurnDisplay(currentPlayer.name);
       return true;
     }
