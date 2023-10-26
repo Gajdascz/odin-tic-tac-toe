@@ -224,6 +224,7 @@ form#information-options-form {
   border-radius: 5px;
   border: 1px solid var(--secondary-accent);
   font-size: 1.25rem;
+  padding: 5px;
 }
 .player-one-information-container,
 .player-two-information-container {
@@ -289,7 +290,7 @@ dialog#end-round-dialog {
   gap: 25px
 }
 #end-round-dialog > h1 {
-  min-width: 150px;
+  min-width: fit-content;
 }
 #end-round-dialog .end-round-buttons-container {
   display: flex;

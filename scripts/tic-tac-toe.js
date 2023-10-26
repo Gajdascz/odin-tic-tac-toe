@@ -19,18 +19,32 @@ const gameBoard = (() => {
     } else { return false; }
   }
 
-  return { getBoard, makeMove, initBoard };
+  const simulateMove = (board, movePosition, player) => {
+      if(!board[movePosition[0]][movePosition[1]]) {
+       // console.log(`Initial Board State - Simulating for Player: ${player.gamePiece} - at ${movePosition}`);
+       // console.table(board);
+        board[movePosition[0]][movePosition[1]] = player.gamePiece;
+     //   console.table(board);
+        return true;
+      } else { return false; }
+    }
+  const undoMove = (board, movePosition) => {
+      board[movePosition[0]][movePosition[1]] = null;
+  }
+
+  return { getBoard, makeMove, initBoard, simulateMove, undoMove };
 })();
 // createPlayer Factory Function
-const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty) => {
+const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty, playerNumber) => {
   const name = playerName;
-  const gamePiece = playerGamePiece;
+  let gamePiece = playerGamePiece;
   const type = playerType;
   const difficulty = selectedDifficulty;
+  const number = playerNumber;
   const wins = 0;
   const losses = 0;
   const moves = 0;
-  return { name, gamePiece, playerType, difficulty, wins, losses, moves };
+  return { name, gamePiece, type, difficulty, wins, losses, moves, number };
 }
 
 // playerOptionsController IIFE Module Object
@@ -47,24 +61,37 @@ const playerOptionsController = (() => {
   playerInformationSubmit.addEventListener((`click`), (e) => {
     const playerOne = createPlayer(
       loadDialog.querySelector(`input#player-one-name`).value.trim() === `` ? 'enigma' : loadDialog.querySelector(`input#player-one-name`).value.trim(),
-      loadDialog.querySelector(`input#player-one-game-piece`).value.trim() === `` ? `?` : loadDialog.querySelector(`input#player-one-game-piece`).value.trim(),
+      loadDialog.querySelector(`input#player-one-game-piece`).value.trim() === `` ? `X` : loadDialog.querySelector(`input#player-one-game-piece`).value.trim(),
       loadDialog.querySelector(`select#player-one-type`).value,
-      loadDialog.querySelector(`select#player-one-difficulty`).value
+      loadDialog.querySelector(`select#player-one-difficulty`).value,
+      1
     );
     const playerTwo = createPlayer(
       loadDialog.querySelector(`input#player-two-name`).value.trim() === `` ? 'amgine' : loadDialog.querySelector(`input#player-two-name`).value.trim(),
-      loadDialog.querySelector(`input#player-two-game-piece`).value.trim() === `` ? `¿` : loadDialog.querySelector(`input#player-two-game-piece`).value.trim(),
+      loadDialog.querySelector(`input#player-two-game-piece`).value.trim() === `` ? `O` : loadDialog.querySelector(`input#player-two-game-piece`).value.trim(),
       loadDialog.querySelector(`select#player-two-type`).value,
-      loadDialog.querySelector(`select#player-two-difficulty`).value
+      loadDialog.querySelector(`select#player-two-difficulty`).value,
+      2
     );
-    gamePlayers.length = 0;
-    gamePlayers.push(playerOne, playerTwo);
-    gameController.updateActiveGamePlayers(gamePlayers);
-    gameController.startNewGame();
-    displayController.updateTurnDisplay(gameController.getCurrentPlayer().name);
-    playerSessionController.initInfoDisplay(gamePlayers);
-    gameController.getCurrentPlayer().playerType === `computer` ? computerAI.makeAIMove(gameController.getCurrentPlayer()) : ``;
-    loadDialog.close();
+    if(playerOne.gamePiece === playerTwo.gamePiece) {
+      alert(`Cannot have same game piece!`)
+      loadDialog.showModal();
+    } else if(playerOne.name === playerTwo.name) {
+      alert(`Cannot have same name!`)
+      loadDialog.showModal();
+    } 
+    else {
+      displayController.clearBoardDisplay();
+      gameBoard.initBoard();
+      gamePlayers.length = 0;
+      gamePlayers.push(playerOne, playerTwo);
+      gameController.updateActiveGamePlayers(gamePlayers);
+      gameController.randomizeFirstTurn();
+      displayController.updateTurnDisplay(gameController.getCurrentPlayer().name);
+      playerSessionController.initInfoDisplay(gamePlayers);
+      if(gameController.getCurrentPlayer().type === `computer`) computerAI.makeAIMove(gameController.getCurrentPlayer());
+      loadDialog.close();
+    }
   });
   loadDialog.addEventListener((`cancel`), (e) => {
     e.preventDefault();
@@ -196,13 +223,13 @@ const playerSessionController = (() => {
 
 
     p1SessionName.textContent = p1.name;
-    p1SessionType.textContent = p1.playerType;
-    p1.playerType === `computer` ? p1SessionDifficulty.textContent = `(${p1.difficulty})` : ``;
+    p1SessionType.textContent = p1.type;
+    if(p1.type === `computer`) p1SessionDifficulty.textContent = `(${p1.difficulty})`;
     p1SessionPiece.textContent = ` - [${p1.gamePiece}]`;
 
     p2SessionName.textContent = p2.name;
-    p2SessionType.textContent = p2.playerType;
-    p2.playerType === `computer` ? p2SessionDifficulty.textContent = `(${p2.difficulty})` : ``;
+    p2SessionType.textContent = p2.type;
+    if(p2.type === `computer`) p2SessionDifficulty.textContent = `(${p2.difficulty})`;
     p2SessionPiece.textContent = ` - [${p2.gamePiece}]`;
     ties = 0;
     updateSessionInfo(gamePlayers);
@@ -244,19 +271,26 @@ const playerSessionController = (() => {
 
 // gameController IIFE Module Object
 const gameController = (() => {
+  const currentBoard = gameBoard.getBoard();
   const activeGamePlayers = [];
   let currentPlayer = null;
   let inactivePlayer = null;
   const updateActiveGamePlayers = (gamePlayers) => {
     currentPlayer = Math.floor(Math.random()*gamePlayers.length) === 0 ? gamePlayers[0] : gamePlayers[1];
+    currentPlayer = gamePlayers[0];
     activeGamePlayers.length = 0;
     activeGamePlayers.push(gamePlayers[0], gamePlayers[1]);
   }
   const updateCurrentPlayer = () => {
     currentPlayer === activeGamePlayers[0] ? (currentPlayer = activeGamePlayers[1], inactivePlayer = activeGamePlayers[0]) : (currentPlayer = activeGamePlayers[0], inactivePlayer = activeGamePlayers[1]);
     displayController.updateTurnDisplay(currentPlayer.name);
-    currentPlayer.playerType === `computer` ? computerAI.makeAIMove(currentPlayer) : ``;
+    if(currentPlayer.type === `computer`) computerAI.makeAIMove(currentPlayer);
   }
+  const getOtherPlayer = (initialPlayer) => {
+    const otherPlayer = (initialPlayer === activeGamePlayers[0] ? activeGamePlayers[1] : activeGamePlayers[0]);
+    return otherPlayer; 
+  }
+
   const getActiveGamePlayers = () => activeGamePlayers;
   const getCurrentPlayer = () => currentPlayer;
   const getInactivePlayer = () => inactivePlayer;
@@ -270,62 +304,66 @@ const gameController = (() => {
       alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`)
       return false;
     } else { 
-      gameBoard.makeMove(movePosition, currentPlayer.gamePiece);
       displayController.updateBoardDisplay(movePosition);
       playerSessionController.incrementMoves(getCurrentPlayer());
       playerSessionController.updateSessionInfo(getActiveGamePlayers());
-      !checkBoard() ? updateCurrentPlayer() : checkResult();
+      !checkBoard(currentBoard) ? updateCurrentPlayer() : checkResult();
       displayController.updateTurnDisplay(currentPlayer.name);
       return true;
     }
   }
-// checkBoard: Checks for 3 in a row or tie. Returns result (true if match or tie, false if not).
-//#region 
-  const checkBoard = () => {
-    let result = false;
-    const currentBoard = gameBoard.getBoard();
+
+  const isEmpty = (board) => {
+    for(let i = 0; i < board.length; i++) {
+      for(let j = 0; j < board[i].length; j++) {
+        return board[i][j] === null ? true : false;
+      }
+    }
+  }
+// checkBoard: Checks for 3 in a row or tie. Returns true if match or tie, false if not).
+  const checkBoard = (board) => {
     const checkTie = (board) => {
-      return (
-        !board[0].includes(null) &&
-        !board[1].includes(null) &&
-        !board[2].includes(null)
-      
-      ); 
+      return (!board[0].includes(null) && !board[1].includes(null) && !board[2].includes(null)); 
     }
     const checkRow = (board, row) => {
-      return board[row].includes(null) ? false : (board[row][0] === board[row][1] && board[row][0] === board[row][2]);
+      if(board[row].includes(null)) return null;
+      if((board[row][0] === board[row][1] && board[row][0] === board[row][2])) return { status: `win`, gamePiece: board[row][0] };
+      return null;
     }
     const checkColumn = (board, column) => {
-      return (
-            board[0][column] === null ||
-            board[1][column] === null ||
-            board[2][column] === null ? 
-            false : (board[0][column] === board[1][column] && board[0][column] === board[2][column])
-            );
+      if(board[0][column] === null || board[1][column] === null || board[2][column] === null) return null;
+      if((board[0][column] === board[1][column] && board[0][column] === board[2][column])) return { status: `win`, gamePiece: board[0][column] };
+      return null;
     }
     const checkDiagonal = (board) => {
-      if(!board[1][1]) return false;
-      else return (
-                    (board[0][0] === board[1][1] && board[0][0] === board[2][2]) ||
-                    (board[0][2] === board[1][1] && board[0][2] === board[2][0])
-                  );
+      if(board[1][1] === null) return null;
+      if((board[0][0] === board[1][1] && board[0][0] === board[2][2]) || (board[0][2] === board[1][1] && board[0][2] === board[2][0])) return { status: `win`, gamePiece: board[1][1] };
+      return null
     }
-    for(let i = 0; i < currentBoard.length; i++) {
-      checkTie(currentBoard)        ? result = `tie` : false;
-      checkRow(currentBoard, i)     ? result = true  : false;
-      checkColumn(currentBoard, i)  ? result = true  : false;
-      checkDiagonal(currentBoard)   ? result = true  : false;
+    let result = checkDiagonal(board);
+    if(result) return result;
+    for(let i = 0; i < board.length; i++) {
+      result = checkRow(board,i);
+      if(result) return result;
+      result = checkColumn(board,i);
+      if(result) return result;
     }
-    return result;
+    if(checkTie(board)) return { status: `tie` };
+    return null;
   }
-//#endregion
   const checkResult = () => {
-    if(checkBoard()) {
-      const result = gameController.checkBoard() === `tie` ?  `Tie` : currentPlayer.name;
-      if (result === `Tie`) playerSessionController.incrementTies(); 
-      else playerSessionController.incrementWins(currentPlayer), playerSessionController.incrementLosses(inactivePlayer); 
-      playerSessionController.updateSessionInfo(gameController.getActiveGamePlayers());
-      endRoundDialog.openEndRoundDialog(result);
+    let result = gameController.checkBoard(currentBoard);
+    if(result) {
+      if(result.status === `tie`) { 
+        playerSessionController.incrementTies();
+        return endRoundDialog.openEndRoundDialog(`Tie`);
+      }
+      else{
+        playerSessionController.incrementWins(currentPlayer)
+        playerSessionController.incrementLosses(inactivePlayer); 
+        playerSessionController.updateSessionInfo(gameController.getActiveGamePlayers());
+        return endRoundDialog.openEndRoundDialog(currentPlayer.name);
+      }
     }
   }
 
@@ -333,10 +371,11 @@ const gameController = (() => {
     displayController.clearBoardDisplay();
     gameBoard.initBoard();
     randomizeFirstTurn();
-    currentPlayer.playerType === `computer` ? computerAI.makeAIMove(currentPlayer) : ``;
+    if(currentPlayer.type === `computer`) computerAI.makeAIMove(currentPlayer);
   }
   return { 
     updateActiveGamePlayers,
+    getOtherPlayer,
     randomizeFirstTurn,
     getActiveGamePlayers, 
     getCurrentPlayer, 
@@ -344,39 +383,98 @@ const gameController = (() => {
     updateCurrentPlayer, 
     checkBoard,
     checkMove,
-    checkResult,
-    startNewGame 
+    checkResult,    
+    isEmpty,  
+    startNewGame
   };
 })();
 
 const computerAI = (() => {
-  const availableMoves = [];
   const makeAIMove = (player) => {
+    const availableMoves = getAvailableMoves(gameBoard.getBoard());
     switch(player.difficulty) {
       case `easy`:
-        getAvailableMoves();
-        availableMoves.length > 0 ? easyMove() : ``;
+        if(availableMoves.length > 0) randomMove();
         break;
       case `medium`:
         break;
       case `hard`:
         break;
       case `impossible`:
+        const currentBoard = gameBoard.getBoard();
+        const bestMove = getBestMove(currentBoard, player);
+        console.log(bestMove)
+        gameController.checkMove(bestMove)
         break;
     }
   }
-  const getAvailableMoves = () => {
-    availableMoves.length = 0;
-    const currentBoard = gameBoard.getBoard();
-    for(let i = 0; i < currentBoard.length; i++){
-      for(let j = 0; j < currentBoard[i].length; j++){
-        currentBoard[i][j] === null ? availableMoves.push([i,j]) : ``; 
+  const getAvailableMoves = (board) => {
+    const availableMoves = [];
+    for(let i = 0; i < board.length; i++){
+      for(let j = 0; j < board[i].length; j++){
+        if(board[i][j] === null) availableMoves.push([i,j]); 
       }
     }
+    return availableMoves;
   }
-  const easyMove = () => {
+  const randomMove = () => {
+    const availableMoves = getAvailableMoves(gameBoard.getBoard());
     const randomMovePos = availableMoves[Math.floor(Math.random()*availableMoves.length)];
     gameController.checkMove(randomMovePos);
+  }
+
+  const getBestMove = (board, player) => {
+    let evalObj = miniMax(board, 0, true, player, [0,0]);
+    if(evalObj.score === 0 && board[1][1] === null) evalObj.move = [1,1];
+    console.log(evalObj)
+  return evalObj.move;
+}
+  const evaluateBoard = (board, depth, player) => {
+    const result = gameController.checkBoard(board);
+    if(!result || result.status === `tie`) return 0
+    if(result) {
+      if(result.gamePiece === player.gamePiece) return 100 - depth;
+      else return depth - 100;
+    }
+    return 0;
+  } 
+
+
+
+  const miniMax = (board, depth, isMaximizing, player, currentMove) => {
+    const opponent = gameController.getOtherPlayer(player);
+    const moves = getAvailableMoves(board);
+    const score = evaluateBoard(board, depth, player);
+    if(score <= -98) return {score:score, move:currentMove};
+    if(Math.abs(score) === 100) return {score:score, move:currentMove};
+    if(moves.length === 0) return {score:0, move:currentMove};
+    if(isMaximizing) {
+      let bestMove = null;
+      let maxEval = -Infinity;
+      for(let move of moves) {
+        gameBoard.simulateMove(board,move,player);
+        let evalObj = miniMax(board, depth + 1, false, opponent, move);
+        if(evalObj.score > maxEval) {
+          maxEval = evalObj.score;
+          bestMove = move;
+        }
+        gameBoard.undoMove(board, move);
+      }
+      return {score:maxEval, move:bestMove};
+    } else {
+      let bestMove = null;
+      let minEval = Infinity;
+        for(let move of moves) {
+          gameBoard.simulateMove(board,move,player);
+          let evalObj = miniMax(board, depth + 1, true, opponent, move);
+          if(evalObj.score < minEval) {
+            minEval = evalObj.score;
+            bestMove = move
+          }
+          gameBoard.undoMove(board,move);
+        }
+      return {score:minEval, move:bestMove};
+    }
   }
   return { makeAIMove };
 })();
