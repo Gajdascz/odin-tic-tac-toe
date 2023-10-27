@@ -1,8 +1,12 @@
+
+// Main gameBoard Module
+// Methods: initBoard(), getBoard(), makeMove(), simulateMove(), undoMove() 
 const gameBoard = (() => {
   const rows = 3;
   const columns = 3;
   const boardArray = [];
 
+  // Initializes 2D array
   const initBoard = (() => {
     for(let i = 0; i < rows; i++) {
       boardArray[i] = [];
@@ -11,7 +15,11 @@ const gameBoard = (() => {
       }
     }
   });
+
+  // Returns gameBoard
   const getBoard = () => boardArray;
+
+  // If cell is available makes the move with given gamePiece
   const makeMove = (movePosition, gamePiece) => {
     if (!boardArray[movePosition[0]][movePosition[1]]) {
       boardArray[movePosition[0]][movePosition[1]] = gamePiece
@@ -19,22 +27,23 @@ const gameBoard = (() => {
     } else { return false; }
   }
 
+  // makeMove except for use with AI
   const simulateMove = (board, movePosition, player) => {
       if(!board[movePosition[0]][movePosition[1]]) {
-       // console.log(`Initial Board State - Simulating for Player: ${player.gamePiece} - at ${movePosition}`);
-       // console.table(board);
         board[movePosition[0]][movePosition[1]] = player.gamePiece;
-     //   console.table(board);
         return true;
       } else { return false; }
     }
+  // Remove gamePiece from cell
   const undoMove = (board, movePosition) => {
       board[movePosition[0]][movePosition[1]] = null;
   }
-
   return { getBoard, makeMove, initBoard, simulateMove, undoMove };
 })();
+
+
 // createPlayer Factory Function
+// Properties: name, gamePiece, type, difficulty, wins, losses, moves, number
 const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty, playerNumber) => {
   const name = playerName;
   let gamePiece = playerGamePiece;
@@ -47,16 +56,18 @@ const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficult
   return { name, gamePiece, type, difficulty, wins, losses, moves, number };
 }
 
-// playerOptionsController IIFE Module Object
+// playerOptionsController Module
+// Initializes player information based on input from form
+// Methods: openOptionsMenu()
 const playerOptionsController = (() => {
   const gamePlayers = [];
   const loadDialog = document.querySelector(`#information-options-dialog`);
   loadDialog.showModal();
-
   const openOptionsMenu = () => {
     loadDialog.showModal();
   }
 
+  // Submit event handler to apply input player information
   const playerInformationSubmit = document.querySelector(`.information-submit-button`);
   playerInformationSubmit.addEventListener((`click`), (e) => {
     const playerOne = createPlayer(
@@ -93,10 +104,13 @@ const playerOptionsController = (() => {
       loadDialog.close();
     }
   });
+
+  // Prevents user from escaping out of menu
   loadDialog.addEventListener((`cancel`), (e) => {
     e.preventDefault();
   });
 
+  // Enables/Disables difficulty select menu if human or computer
   const typeDifficultySelect = document.querySelectorAll(`.type-difficulty-container`);
   typeDifficultySelect.forEach((container) => {
     container.addEventListener((`change`), (e) => {
@@ -107,10 +121,15 @@ const playerOptionsController = (() => {
   return { openOptionsMenu };
 })();
 
-// displayController IIFE Module Object
+
+// displayController Module
+// Handles The Game's User Interface
+// Methods: updateTurnDisplay(), updateBoardDisplay(), clearBoardDisplay()  
 const  displayController = (() => {
   gameBoard.initBoard();
   const currentBoard = gameBoard.getBoard();
+
+  // Dynamically creates gameBoard display with relevant data attributes
   const gameBoardDisplay = document.querySelector(`.game-board-container`);
   for(let i = 0; i < currentBoard.length; i++) { 
     const boardRowDiv = document.createElement(`div`);
@@ -125,6 +144,8 @@ const  displayController = (() => {
       gameBoardDisplay.append(boardRowDiv);
     }
   }
+
+  // Handles User Input on gameBoard() 
   const boardCells = document.querySelectorAll(`[data-row]`);
   boardCells.forEach((cell) => {
     cell.addEventListener((`click`), (e) => {
@@ -135,11 +156,13 @@ const  displayController = (() => {
     });
   });
 
+  // Input User gamePiece in cell
   const updateBoardDisplay = (movePosition) => {
     const cell = gameBoardDisplay.querySelector(`[data-row="${movePosition[0]}"][data-column="${movePosition[1]}"]`);
     cell.textContent = currentBoard[movePosition[0]][movePosition[1]];
     }
 
+  // Player Options Menu Button
   const playerOptionsButton = document.querySelector(`.player-options-button`);
   playerOptionsButton.addEventListener((`click`), (e) => {
     playerOptionsController.openOptionsMenu();
@@ -160,9 +183,10 @@ const  displayController = (() => {
           };
 })();
 
-// endRoundController IIFE Module
+// endRoundDialog Module
+// Handles the end of round winner display and options (Play Again, Open Player Options Menu)
+// Methods: openEndRoundDialog()
 const endRoundDialog = (() => { 
-
   const endRoundDialog = document.querySelector(`dialog#end-round-dialog`);
   const resultDisplay = endRoundDialog.querySelector(`.end-round-result`);
   const openEndRoundDialog = (result) => {
@@ -189,8 +213,13 @@ const endRoundDialog = (() => {
   return { openEndRoundDialog }
  })();
 
-// playerSessionController IIFE Module
+// playerSessionController Module
+// Handles the Player Session Information Statistics Container and Information
+// Methods: initInfoDisplay(), updateSessionInfo(), incrementMoves(), incrementWins(), incrementLosses(), incrementTies() 
 const playerSessionController = (() => {
+
+  // DOM Element querySelectors
+  //#region
   const playerOneSessionContainer = document.querySelector(`.player-one-session`);
   const playerTwoSessionContainer = document.querySelector(`.player-two-session`);
   const p1SessionName = playerOneSessionContainer.querySelector(`.p1-session-name`);
@@ -209,18 +238,18 @@ const playerSessionController = (() => {
   const p2Losses = playerTwoSessionContainer.querySelector(`.p2-session-losses`);
   const p2Moves = playerTwoSessionContainer.querySelector(`.p2-session-moves`);
 
-
   const sessionTotalsContainer = document.querySelector(`.session-totals`);
   const totalTies = sessionTotalsContainer.querySelector(`.session-total-ties`);
   const totalGames = sessionTotalsContainer.querySelector(`.session-total-games`);
   const totalMoves = sessionTotalsContainer.querySelector(`.session-total-moves`);
-
+  //#endregion
+  
   let ties = 0;
 
+  // Initializes Player Session Information
   const initInfoDisplay = (gamePlayers) => {
     const p1 = gamePlayers[0];
     const p2 = gamePlayers[1];
-
 
     p1SessionName.textContent = p1.name;
     p1SessionType.textContent = p1.type;
@@ -235,6 +264,7 @@ const playerSessionController = (() => {
     updateSessionInfo(gamePlayers);
   }
 
+  // Updates Player Session Information
   const updateSessionInfo = (gamePlayers) => {
     const p1 = gamePlayers [0];
     const p2 = gamePlayers [1];
@@ -269,36 +299,45 @@ const playerSessionController = (() => {
   return { initInfoDisplay, updateSessionInfo, incrementMoves, incrementWins, incrementLosses, incrementTies };
 })();
 
-// gameController IIFE Module Object
+// gameController Module 
+// Handles the primary game logic and flow
+// Methods: updateActiveGamePlayers(), getOtherPlayer(), randomizeFirstTurn(), getActiveGamePlayers(),
+//          getCurrentPlayer(), getInactivePlayer(), updateCurrentPlayer(), checkBoard(), checkMove(),
+//          checkResult(), startNewGame()
 const gameController = (() => {
   const currentBoard = gameBoard.getBoard();
   const activeGamePlayers = [];
   let currentPlayer = null;
   let inactivePlayer = null;
+  // Resets activeGamePlayers array and inputs new information values
   const updateActiveGamePlayers = (gamePlayers) => {
     currentPlayer = Math.floor(Math.random()*gamePlayers.length) === 0 ? gamePlayers[0] : gamePlayers[1];
     currentPlayer = gamePlayers[0];
     activeGamePlayers.length = 0;
     activeGamePlayers.push(gamePlayers[0], gamePlayers[1]);
   }
+
+  // Swaps active and inactive player for their respective turn
   const updateCurrentPlayer = () => {
     currentPlayer === activeGamePlayers[0] ? (currentPlayer = activeGamePlayers[1], inactivePlayer = activeGamePlayers[0]) : (currentPlayer = activeGamePlayers[0], inactivePlayer = activeGamePlayers[1]);
     displayController.updateTurnDisplay(currentPlayer.name);
     if(currentPlayer.type === `computer`) computerAI.makeAIMove(currentPlayer);
   }
+  const getActiveGamePlayers = () => activeGamePlayers;
+  const getCurrentPlayer = () => currentPlayer;
+  const getInactivePlayer = () => inactivePlayer;
+  const randomizeFirstTurn = () => {
+    currentPlayer = Math.floor(Math.random()*activeGamePlayers.length) === 0 ? activeGamePlayers[0] : activeGamePlayers[1];
+  }
+
+  // Returns the player that's not passed as an argument (Used in AI)
   const getOtherPlayer = (initialPlayer) => {
     const otherPlayer = (initialPlayer === activeGamePlayers[0] ? activeGamePlayers[1] : activeGamePlayers[0]);
     return otherPlayer; 
   }
 
-  const getActiveGamePlayers = () => activeGamePlayers;
-  const getCurrentPlayer = () => currentPlayer;
-  const getInactivePlayer = () => inactivePlayer;
 
-
-  const randomizeFirstTurn = () => {
-    currentPlayer = Math.floor(Math.random()*activeGamePlayers.length) === 0 ? activeGamePlayers[0] : activeGamePlayers[1];
-  }
+  // Validates if an attempted move is valid and updates accordingly 
   const checkMove = (movePosition) => {
     if(!gameBoard.makeMove(movePosition, currentPlayer.gamePiece)) {
       alert(`${gameController.getCurrentPlayer().name}, please select an open spot.`)
@@ -313,14 +352,7 @@ const gameController = (() => {
     }
   }
 
-  const isEmpty = (board) => {
-    for(let i = 0; i < board.length; i++) {
-      for(let j = 0; j < board[i].length; j++) {
-        return board[i][j] === null ? true : false;
-      }
-    }
-  }
-// checkBoard: Checks for 3 in a row or tie. Returns true if match or tie, false if not).
+// Checks for 3 in a row or tie. Returns a result object containing status and gamePiece.
   const checkBoard = (board) => {
     const checkTie = (board) => {
       return (!board[0].includes(null) && !board[1].includes(null) && !board[2].includes(null)); 
@@ -351,6 +383,8 @@ const gameController = (() => {
     if(checkTie(board)) return { status: `tie` };
     return null;
   }
+
+  // Checks the result of the match and updates accordingly.
   const checkResult = () => {
     let result = gameController.checkBoard(currentBoard);
     if(result) {
@@ -383,31 +417,34 @@ const gameController = (() => {
     updateCurrentPlayer, 
     checkBoard,
     checkMove,
-    checkResult,    
-    isEmpty,  
+    checkResult, 
     startNewGame
   };
 })();
 
+
+// computerAI Module - The bane of my existence
 const computerAI = (() => {
   const makeAIMove = (player) => {
+    const currentBoard = gameBoard.getBoard();
     const availableMoves = getAvailableMoves(gameBoard.getBoard());
     switch(player.difficulty) {
       case `easy`:
         if(availableMoves.length > 0) randomMove();
+        break;
+      case `stupid`:
+        const bestMove = getBestMove(currentBoard, player);
+        gameController.checkMove(bestMove)
         break;
       case `medium`:
         break;
       case `hard`:
         break;
       case `impossible`:
-        const currentBoard = gameBoard.getBoard();
-        const bestMove = getBestMove(currentBoard, player);
-        console.log(bestMove)
-        gameController.checkMove(bestMove)
         break;
     }
   }
+  // Returns all available moves on the passed board
   const getAvailableMoves = (board) => {
     const availableMoves = [];
     for(let i = 0; i < board.length; i++){
@@ -417,18 +454,25 @@ const computerAI = (() => {
     }
     return availableMoves;
   }
+
+  // Generates a random move from available moves
   const randomMove = () => {
     const availableMoves = getAvailableMoves(gameBoard.getBoard());
     const randomMovePos = availableMoves[Math.floor(Math.random()*availableMoves.length)];
     gameController.checkMove(randomMovePos);
   }
 
+  // miniMax Helper function
   const getBestMove = (board, player) => {
-    let evalObj = miniMax(board, 0, true, player, [0,0]);
+    let evalObj = miniMax(board, 0, true, player, []);
     if(evalObj.score === 0 && board[1][1] === null) evalObj.move = [1,1];
     console.log(evalObj)
   return evalObj.move;
 }
+
+
+  // Evaluate board's state and returns relevant score
+  // 100 if maximizing player wins -100 if opponent wins (subtract depth for prioritizing quicker wins)
   const evaluateBoard = (board, depth, player) => {
     const result = gameController.checkBoard(board);
     if(!result || result.status === `tie`) return 0
@@ -440,7 +484,12 @@ const computerAI = (() => {
   } 
 
 
-
+  // Calculates the minimizing and maximizing scores of every possible game state to make the most optimal move.
+  // It takes an initial game board's state and recursively creates a tree of nodes which
+  // represent all possible move combinations (alternating between maximizing and minimizing player)
+  // with that particular game state's evaluation score.
+  // This implementation returns an object containing the optimal evaluation score and move.
+  // At least it was supposed to.... 
   const miniMax = (board, depth, isMaximizing, player, currentMove) => {
     const opponent = gameController.getOtherPlayer(player);
     const moves = getAvailableMoves(board);
