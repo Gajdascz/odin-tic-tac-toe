@@ -1,7 +1,8 @@
 
-// Main gameBoard Module
-// Methods: initBoard(), getBoard(), makeMove(), simulateMove(), undoMove() 
-const gameBoard = (() => {
+/* gameBoard Module
+ * Methods: initBoard(), getBoard(), makeMove(), simulateMove(), undoMove() 
+ */
+ const gameBoard = (() => {
   const rows = 3;
   const columns = 3;
   const boardArray = [];
@@ -41,10 +42,10 @@ const gameBoard = (() => {
   return { getBoard, makeMove, initBoard, simulateMove, undoMove };
 })();
 
-
-// createPlayer Factory Function
-// Properties: name, gamePiece, type, difficulty, wins, losses, moves, number
-const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty, playerNumber) => {
+ /* createPlayer Factory Function
+  * Properties: name, gamePiece, type, difficulty, wins, losses, moves, number
+  */
+ const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficulty, playerNumber) => {
   const name = playerName;
   let gamePiece = playerGamePiece;
   const type = playerType;
@@ -56,9 +57,10 @@ const createPlayer = (playerName, playerGamePiece, playerType, selectedDifficult
   return { name, gamePiece, type, difficulty, wins, losses, moves, number };
 }
 
-// playerOptionsController Module
-// Initializes player information based on input from form
-// Methods: openOptionsMenu()
+/* playerOptionsController Module
+ * Initializes player information based on input from form
+ * Methods: openOptionsMenu()
+ */
 const playerOptionsController = (() => {
   const gamePlayers = [];
   const loadDialog = document.querySelector(`#information-options-dialog`);
@@ -100,8 +102,8 @@ const playerOptionsController = (() => {
       gameController.randomizeFirstTurn();
       displayController.updateTurnDisplay(gameController.getCurrentPlayer().name);
       playerSessionController.initInfoDisplay(gamePlayers);
-      if(gameController.getCurrentPlayer().type === `computer`) computerAI.makeAIMove(gameController.getCurrentPlayer());
       loadDialog.close();
+      if(gameController.getCurrentPlayer().type === `computer`) computerAI.makeAIMove(gameController.getCurrentPlayer());
     }
   });
 
@@ -122,9 +124,9 @@ const playerOptionsController = (() => {
 })();
 
 
-// displayController Module
-// Handles The Game's User Interface
-// Methods: updateTurnDisplay(), updateBoardDisplay(), clearBoardDisplay()  
+/* displayController Module
+ * Methods: updateTurnDisplay(), updateBoardDisplay(), clearBoardDisplay()  
+ */
 const  displayController = (() => {
   gameBoard.initBoard();
   const currentBoard = gameBoard.getBoard();
@@ -183,9 +185,9 @@ const  displayController = (() => {
           };
 })();
 
-// endRoundDialog Module
-// Handles the end of round winner display and options (Play Again, Open Player Options Menu)
-// Methods: openEndRoundDialog()
+/* endRoundDialog Module
+*  Methods: openEndRoundDialog()
+*/
 const endRoundDialog = (() => { 
   const endRoundDialog = document.querySelector(`dialog#end-round-dialog`);
   const resultDisplay = endRoundDialog.querySelector(`.end-round-result`);
@@ -213,9 +215,9 @@ const endRoundDialog = (() => {
   return { openEndRoundDialog }
  })();
 
-// playerSessionController Module
-// Handles the Player Session Information Statistics Container and Information
-// Methods: initInfoDisplay(), updateSessionInfo(), incrementMoves(), incrementWins(), incrementLosses(), incrementTies() 
+/* playerSessionController Module
+*  Methods: initInfoDisplay(), updateSessionInfo(), incrementMoves(), incrementWins(), incrementLosses(), incrementTies() 
+*/
 const playerSessionController = (() => {
 
   // DOM Element querySelectors
@@ -299,11 +301,12 @@ const playerSessionController = (() => {
   return { initInfoDisplay, updateSessionInfo, incrementMoves, incrementWins, incrementLosses, incrementTies };
 })();
 
-// gameController Module 
-// Handles the primary game logic and flow
-// Methods: updateActiveGamePlayers(), getOtherPlayer(), randomizeFirstTurn(), getActiveGamePlayers(),
-//          getCurrentPlayer(), getInactivePlayer(), updateCurrentPlayer(), checkBoard(), checkMove(),
-//          checkResult(), startNewGame()
+/* gameController Module
+ * Handles the primary game logic and flow
+ * Methods: updateActiveGamePlayers(), getOtherPlayer(), randomizeFirstTurn(), getActiveGamePlayers(),
+ *         getCurrentPlayer(), getInactivePlayer(), updateCurrentPlayer(), checkBoard(), checkMove(),
+ *         checkResult(), startNewGame()
+ */
 const gameController = (() => {
   const currentBoard = gameBoard.getBoard();
   const activeGamePlayers = [];
@@ -423,28 +426,34 @@ const gameController = (() => {
 })();
 
 
-// computerAI Module - The bane of my existence
+/* computerAI Module
+ * Methods: makeAIMove()
+ */
 const computerAI = (() => {
+  // Makes AI move based on player difficulty.
   const makeAIMove = (player) => {
     const currentBoard = gameBoard.getBoard();
     const availableMoves = getAvailableMoves(gameBoard.getBoard());
+    const bestMove = getBestMove(currentBoard, player).move;
     switch(player.difficulty) {
       case `easy`:
         if(availableMoves.length > 0) randomMove();
         break;
-      case `stupid`:
-        const bestMove = getBestMove(currentBoard, player);
-        gameController.checkMove(bestMove)
-        break;
       case `medium`:
+        if(Math.random() < .50) gameController.checkMove(bestMove);
+        else randomMove();
         break;
       case `hard`:
+        if(!currentBoard[1][1]) gameController.checkMove([1,1]);
+        else if(Math.random() < .80) gameController.checkMove(bestMove);
+        else randomMove();
         break;
       case `impossible`:
+        gameController.checkMove(bestMove);
         break;
     }
   }
-  // Returns all available moves on the passed board
+  // Returns all available moves from the passed board
   const getAvailableMoves = (board) => {
     const availableMoves = [];
     for(let i = 0; i < board.length; i++){
@@ -462,68 +471,160 @@ const computerAI = (() => {
     gameController.checkMove(randomMovePos);
   }
 
-  // miniMax Helper function
+  // miniMax Helper function to get optimal move | returns: minimax evaluation object {score,move}
   const getBestMove = (board, player) => {
-    let evalObj = miniMax(board, 0, true, player, []);
-    if(evalObj.score === 0 && board[1][1] === null) evalObj.move = [1,1];
-    console.log(evalObj)
-  return evalObj.move;
+    if(!board[1][1]) return {score:0, move:[1,1]};
+    const opponent = gameController.getOtherPlayer(player);
+    const evalObj = miniMax(board, 0, true, player, opponent, [], player);
+    if(evalObj.criticalMove && (Math.abs(evalObj.criticalMove.score) > evalObj.score)) return evalObj.criticalMove;
+    else return evalObj
 }
-
-
-  // Evaluate board's state and returns relevant score
-  // 100 if maximizing player wins -100 if opponent wins (subtract depth for prioritizing quicker wins)
-  const evaluateBoard = (board, depth, player) => {
+  /* evaluateBoard miniMax helper function | returns: node-score 
+  *  score is subtracted by depth to improve decision making and tree traversal 
+  *  returns: 100 if max can win in immediate turn (depth=1), -99 for min can win in immediate turn (depth=1), etc.
+  */
+  const evaluateBoard = (board, depth, maximizingPlayer) => {
     const result = gameController.checkBoard(board);
     if(!result || result.status === `tie`) return 0
     if(result) {
-      if(result.gamePiece === player.gamePiece) return 100 - depth;
-      else return depth - 100;
-    }
-    return 0;
-  } 
+      if(result.gamePiece === maximizingPlayer.gamePiece) return (101 - depth);
+      if(result.gamePiece !== maximizingPlayer.gamePiece) return (depth - 101);
+    } else return 0; 
+  }
 
-
-  // Calculates the minimizing and maximizing scores of every possible game state to make the most optimal move.
-  // It takes an initial game board's state and recursively creates a tree of nodes which
-  // represent all possible move combinations (alternating between maximizing and minimizing player)
-  // with that particular game state's evaluation score.
-  // This implementation returns an object containing the optimal evaluation score and move.
-  // At least it was supposed to.... 
-  const miniMax = (board, depth, isMaximizing, player, currentMove) => {
-    const opponent = gameController.getOtherPlayer(player);
-    const moves = getAvailableMoves(board);
-    const score = evaluateBoard(board, depth, player);
-    if(score <= -98) return {score:score, move:currentMove};
-    if(Math.abs(score) === 100) return {score:score, move:currentMove};
-    if(moves.length === 0) return {score:0, move:currentMove};
+  /* minMax algorithm | returns: object {score,move}
+  *  Calculates the minimizing and maximizing scores of every possible game state (node).
+  *  It takes an initial game board's state and recursively creates a tree of nodes which
+  *  represent all possible move combinations (alternating between maximizing and minimizing player) 
+  *  along with that particular game state's evaluation score.
+  */
+  const miniMax = (board, depth, isMaximizing, currentPlayer, opponent, currentMove, maximizingPlayer) => {
+    const moves = getAvailableMoves(board); 
+    const score = evaluateBoard(board, depth, maximizingPlayer);
+    if(Math.abs(score) === 100) return {score, move:currentMove};
+    if(score <= -99) return {score, move:currentMove};
+    else if(score <= -95) return {score, move:currentMove};
+    if(moves.length === 0) return {score:0, move:[]};
     if(isMaximizing) {
       let bestMove = null;
       let maxEval = -Infinity;
-      for(let move of moves) {
-        gameBoard.simulateMove(board,move,player);
-        let evalObj = miniMax(board, depth + 1, false, opponent, move);
+      let criticalMove = null;
+      for(let move of moves) {        
+        gameBoard.simulateMove(board,move,currentPlayer);
+        let evalObj = miniMax(board, depth + 1, false, opponent, currentPlayer, move, maximizingPlayer);
         if(evalObj.score > maxEval) {
+          if(evalObj.score <= -99) criticalMove = evalObj;
           maxEval = evalObj.score;
           bestMove = move;
         }
         gameBoard.undoMove(board, move);
       }
-      return {score:maxEval, move:bestMove};
+      return {score:maxEval, move:bestMove, criticalMove};
     } else {
       let bestMove = null;
       let minEval = Infinity;
+      let criticalMove = null;
         for(let move of moves) {
-          gameBoard.simulateMove(board,move,player);
-          let evalObj = miniMax(board, depth + 1, true, opponent, move);
+          gameBoard.simulateMove(board,move,currentPlayer);
+          let evalObj = miniMax(board, depth + 1, true, opponent, currentPlayer, move, maximizingPlayer);
           if(evalObj.score < minEval) {
+            if(evalObj.score <= -99) criticalMove = evalObj;
             minEval = evalObj.score;
             bestMove = move
           }
           gameBoard.undoMove(board,move);
         }
-      return {score:minEval, move:bestMove};
+      return {score:minEval, move:bestMove, criticalMove};
     }
   }
+
+  // miniMax testing and debugging functions: testMiniMax, analyzeMiniMax
+  //#region
+  // Helper function for debugging and watching miniMax algorithm
+  const testMiniMax = (player, board, analyze) => {
+    const opponent = gameController.getOtherPlayer(player);
+    let evalObj = null;
+    if(analyze) { 
+      evalObj = analyzeMiniMax(board, 0, true, player, opponent, [], player);
+    } else { 
+      evalObj = miniMax(board, 0, true, player, opponent, [], player);
+    }
+    if(evalObj.criticalMove && (Math.abs(evalObj.criticalMove.score) >= evalObj.score)) {
+        console.log(`\n\n`);
+        console.log(`For Player: ${player.gamePiece} miniMax Recommends [${evalObj.criticalMove.move}] Based on a score of ${evalObj.criticalMove.score}`)
+        console.log("On Board:")
+        console.table(board);
+        console.log(`---------------------------------------------------`)
+    } else {
+        console.log(`\n\n`);
+        console.log(`For Player: ${player.gamePiece} miniMax Recommends [${evalObj.move}] Based on a score of ${evalObj.score}`)
+        console.log("On Board:")
+        console.table(board);
+        console.log(`---------------------------------------------------`)
+      }
+  }
+  // miniMax but with console logging and separated return statements for debugging and analyzing flow/logic
+  const analyzeMiniMax = (board, depth, isMaximizing, currentPlayer, opponent, currentMove, maximizingPlayer) => {
+    const moves = getAvailableMoves(board);
+    const score = evaluateBoard(board, depth, maximizingPlayer);
+    if(currentMove.length !== 0){
+    console.log(`Score: ${score} for Move: [${currentMove}] at Depth:${depth}`);
+    console.log(`Board State`)
+    console.table(board);
+    console.log(`\n\n`)
+    } else {
+      console.log(`Initial Board State`);
+      console.log(`for isMaximizing: ${isMaximizing} | maximizingPlayer: ${maximizingPlayer.gamePiece}`);
+      console.log(`CurrentPlayer: ${currentPlayer.gamePiece} VERSUS Opponent: ${opponent.gamePiece}`);
+      console.table(board)
+      console.log(`-------------------------------------------------------------`)
+      console.log(`\n\n`)
+    }
+    if(Math.abs(score) === 100) return {score, move:currentMove};
+    if(score <= -99) {
+      return {score, move:currentMove}
+    } else if(score <= -95) {
+      return {score, move:currentMove};
+    }
+    if(moves.length === 0) {
+      return {score:0, move:[]};
+    }
+    if(isMaximizing) {
+      let bestMove = null;
+      let maxEval = -Infinity;
+      let criticalMove = null;
+      for(let move of moves) {        
+        console.log(`maxEval-Simulating Move for player: ${currentPlayer.gamePiece} at [${move}] at Depth:${depth+1}`)
+        gameBoard.simulateMove(board,move,currentPlayer);
+        let evalObj = analyzeMiniMax(board, depth + 1, false, opponent, currentPlayer, move, maximizingPlayer);
+        if(evalObj.score > maxEval) {
+          if(evalObj.score <= -99) criticalMove = evalObj;
+          maxEval = evalObj.score;
+          bestMove = move;
+        }
+        console.log(`Removing Move for player: ${currentPlayer.gamePiece}, at [${move}] at Depth:${depth}`)
+        gameBoard.undoMove(board, move);
+      }
+      return {score:maxEval, move:bestMove, criticalMove};
+    } else {
+      let bestMove = null;
+      let minEval = Infinity;
+      let criticalMove = null;
+        for(let move of moves) {
+          console.log(`minEval-Simulating Move for player: ${currentPlayer.gamePiece} at [${move}] at Depth:${depth+1}`)
+          gameBoard.simulateMove(board,move,currentPlayer);
+          let evalObj = analyzeMiniMax(board, depth + 1, true, opponent, currentPlayer, move, maximizingPlayer);
+          if(evalObj.score < minEval) {
+            if(evalObj.score <= -99) criticalMove = evalObj;
+            minEval = evalObj.score;
+            bestMove = move
+          }
+          console.log(`Removing Move for player: ${currentPlayer.gamePiece}, at [${move}] at Depth:${depth}`)
+          gameBoard.undoMove(board,move);
+        }
+      return {score:minEval, move:bestMove, criticalMove};
+    }
+  }
+  //#endregion
   return { makeAIMove };
 })();
