@@ -1,6 +1,6 @@
 # odin-tic-tac-toe
-TOP: Tic-Tac-Toe
-Live Preview: https://gajdascz.github.io/odin-tic-tac-toe/
+TOP: Tic-Tac-Toe <br/>
+Live Preview: https://gajdascz.github.io/odin-tic-tac-toe/ <br/>
 Project Page: [The Odin Project](https://www.theodinproject.com/lessons/node-path-javascript-tic-tac-toe)
 
 # Features
