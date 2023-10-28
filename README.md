@@ -12,15 +12,15 @@
   - **Medium**: The computer has a 50% chance of playing optimally.
   - **Hard**: The computer has an 80% chance of playing an optimal move and a 20% chance of playing a random move.
   - **Impossible**: The computer always plays the optimal move (unbeatable).
-  - **Optimal moves are determined using a miniMax algorithm.**
+  - _Optimal moves are determined using a miniMax algorithm._
 * Live player session information display containing the following
-  - Player:
+  - **Player**:
     - _name_
     - _type_ + _game piece_
     - _Losses_
     - _Wins_
     - _Moves_
-  - Totals:
+  - **Totals**:
     - _Ties_
     - _Games_
     - _Moves_
