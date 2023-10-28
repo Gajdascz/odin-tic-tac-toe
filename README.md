@@ -20,10 +20,10 @@
     - _Losses_
     - _Wins_
     - _Moves_
- - Totals:
-   - _Ties_
-   - _Games_
-   - _Moves_
+  - Totals:
+    - _Ties_
+    - _Games_
+    - _Moves_
 
 ### Other
 - If you're interested in exploring the code, there are debugging and analyzing functions available for testing and observing the miniMax algorithm in action:
