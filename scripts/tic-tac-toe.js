@@ -503,7 +503,7 @@ const computerAI = (() => {
     const score = evaluateBoard(board, depth, maximizingPlayer);
     if(Math.abs(score) === 100) return {score, move:currentMove};
     if(score <= -99) return {score, move:currentMove};
-    else if(score <= -95) return {score, move:currentMove};
+    else if(score <= -96) return {score, move:currentMove};
     if(moves.length === 0) return {score:0, move:[]};
     if(isMaximizing) {
       let bestMove = null;

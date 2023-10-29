@@ -24,9 +24,11 @@ button {
   cursor: pointer;  
 }
 .filler {
+  grid-column: 1 / -1;
   grid-area: filler;
   background-color: var(--secondary-color);
-  height: 40vh;
+  height: 100vh;
+  width: 100%;
 
 }
 
